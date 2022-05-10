@@ -6,7 +6,15 @@ namespace iengine
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            if (args.Length < 2)
+            {
+                Console.WriteLine("Invalid arguments.");
+                Console.WriteLine("Usage: iengine <method> <filename>");
+            }
+            else
+            {
+                // Code Here
+            }
         }
     }
 }
