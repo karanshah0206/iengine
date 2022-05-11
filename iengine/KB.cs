@@ -15,40 +15,30 @@ namespace iengine
             _sentences = new();
         }
 
-        // Add New Sentence To KB
-        // Sentence Contains Only Alphanumeric Symbols & Operations (No Spaces)
+        // Add Sentence To KB (Sentence Cannot Contain Spaces)
         public void AddSentence(string sentence)
         {
-            sentence = sentence.Replace(" ", string.Empty);
-            if (!_sentences.Contains(sentence))
+            if (!_sentences.Contains(sentence) && sentence.Length > 0)
             {
-                // Check If Sentence Is Atomic (i.e. Is It A Symbol?)
-                // Sentence Is Atomic If Has No Operations (Alphanumeric)
-                Regex alphaNumeric = new(@"^[a-zA-Z0-9]+$");
+                // Check If Sentence Is A Fact
+                Regex factPattern = new(@"^[a-zA-Z0-9]+$");
 
-                // Add Symbol With Value True
-                if (alphaNumeric.IsMatch(sentence))
+                // If Sentence Is Fact, Append Symbol Value To True
+                if (factPattern.IsMatch(sentence))
                 {
                     _symbols[sentence] = true;
                 }
-                // Add Sentence And Unknown Symbols
+                // Else Add New Sentence
                 else
                 {
-                    // Add Sentence
                     _sentences.Add(sentence);
 
-                    // Add Symbols
-                    string[] symbols = Regex.Split(sentence, "[()&|<=>~]+");
-                    foreach (string symbol in symbols)
+                    // Look For Unknown Symbols In Sentence
+                    foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
                     {
-                        string value = symbol.Trim();
-
-                        // Continue If String Is Blank
-                        if (value.Length <= 0) continue;
-
-                        // Add Symbol If Doesn't Exist
-                        if (!_symbols.ContainsKey(value))
-                            _symbols[value] = false;
+                        if (symbol.Trim().Length <= 0) continue;
+                        if (!_symbols.ContainsKey(symbol.Trim()))
+                            _symbols[symbol.Trim()] = false;
                     }
                 }
             }
