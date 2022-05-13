@@ -54,6 +54,59 @@ namespace iengine
             }
         }
 
+        // Split Elements In Sentence To An Array
+        private string[] SentenceToArray(string sentence)
+        {
+            List<string> tokens = new();
+            string token = "";
+
+            for (int i = 0; i < sentence.Length; i++)
+            {
+                // Update Token
+                token += sentence.Substring(i, 1);
+
+                // If Token Is Incomplete, Continue
+                if (i < sentence.Length - 1 && !IsFullToken(token, sentence.Substring(i + 1, 1)))
+                    continue;
+
+                // Check If Last Character In Sentence Is Valid
+                else if (i == sentence.Length - 1) IsFullToken(token);
+
+                // Add Complete Token To Array
+                tokens.Add(token);
+                token = "";
+            }
+
+            return tokens.ToArray();
+        }
+
+        // Check If Token Is Complete
+        private bool IsFullToken(string token, string next = "#")
+        {
+            // If Token Is A Symbol
+            if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
+            {
+                // Symbol Is Last Token In Sentence
+                if (next == "#") return true;
+
+                // Incomplete Symbol
+                if (Regex.IsMatch(next, "^[z-zA-Z0-9]$")) return false;
+
+                // Complete Symbol
+                return true;
+            }
+
+            // If Token Is A Valid Operator
+            else if (Regex.IsMatch(token, "^[|]{2}$|^<=>$|^=>$|^&$|^~$|^[(]{1}$|^[)]{1}$"))
+                return true;
+
+            // If Invalid Token, Throw Format Exception
+            else if (token != "|" && token != "<" && token != "<=" && token != "=")
+                throw new FormatException("Unknown Token " + token.Substring(token.Length - 1) + " Found In Data File.");
+
+            return false;
+        }
+
         // Convert Infix Sentences To Postfix Using Shunting Yard Algorithm
         private Queue<string> ShuntingYard(string[] infixSentence)
         {
