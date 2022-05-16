@@ -34,77 +34,18 @@ namespace iengine
                 Regex factPattern = new(@"^[a-zA-Z0-9]+$");
 
                 // If Sentence Is Fact, Append Symbol Value To True
-                if (factPattern.IsMatch(sentence))
-                {
-                    _symbols[sentence] = true;
-                }
-                // Else Add New Sentence
-                else
+                if (factPattern.IsMatch(sentence)) _symbols[sentence] = true;
+                else // Else Add New Sentence
                 {
                     _sentences.Add(sentence);
 
                     // Look For Unknown Symbols In Sentence
                     foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
-                    {
                         if (symbol.Trim().Length <= 0) continue;
-                        if (!_symbols.ContainsKey(symbol.Trim()))
+                        else if (!_symbols.ContainsKey(symbol.Trim()))
                             _symbols[symbol.Trim()] = false;
-                    }
                 }
             }
-        }
-
-        // Split Elements In Sentence To An Array
-        private string[] SentenceToArray(string sentence)
-        {
-            List<string> tokens = new();
-            string token = "";
-
-            for (int i = 0; i < sentence.Length; i++)
-            {
-                // Update Token
-                token += sentence.Substring(i, 1);
-
-                // If Token Is Incomplete, Continue
-                if (i < sentence.Length - 1 && !IsFullToken(token, sentence.Substring(i + 1, 1)))
-                    continue;
-
-                // Check If Last Character In Sentence Is Valid
-                else if (i == sentence.Length - 1) IsFullToken(token);
-
-                // Add Complete Token To Array
-                tokens.Add(token);
-                token = "";
-            }
-
-            return tokens.ToArray();
-        }
-
-        // Check If Token Is Complete
-        private bool IsFullToken(string token, string next = "#")
-        {
-            // If Token Is A Symbol
-            if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
-            {
-                // Symbol Is Last Token In Sentence
-                if (next == "#") return true;
-
-                // Incomplete Symbol
-                if (Regex.IsMatch(next, "^[z-zA-Z0-9]$")) return false;
-
-                // Complete Symbol
-                return true;
-            }
-
-            // If Token Is A Valid Operator
-            else if (Regex.IsMatch(token, "^[|]{2}$|^<=>$|^=>$|^&$|^~$|^[(]{1}$|^[)]{1}$"))
-                return true;
-
-            // If Invalid Token, Throw Format Exception
-            else if (token != "|" && token != "<" && token != "<=" && token != "=")
-                throw new FormatException("Unknown Token " + token.Substring(token.Length - 1) + " Found In Data File.");
-
-            return false;
         }
 
         // Convert Infix Sentences To Postfix Using Shunting Yard Algorithm
@@ -161,7 +102,7 @@ namespace iengine
                             break;
                         }
 
-                        // If First Item On Stack Takes Precedence
+                        // If Stack Item Takes Precedence
                         // Or Equal Precedence And Token Is Left-Associative, Enqueue Stack Item
                         if (_operatorPrecedence[stackItem] > _operatorPrecedence[token]
                             || (_operatorPrecedence[stackItem] == _operatorPrecedence[token] && token != "~"))
@@ -178,8 +119,49 @@ namespace iengine
 
             // Enqueue Remaining Operators In Stack
             while (stack.Count > 0) queue.Enqueue(stack.Pop());
-
             return queue;
+        }
+
+        // Split Elements In Sentence To An Array
+        static private string[] SentenceToArray(string sentence)
+        {
+            List<string> tokens = new();
+            string token = "";
+
+            // Get Complete Token From Sentence
+            for (int i = 0; i < sentence.Length; i++)
+            {
+                // Update Token
+                token += sentence.Substring(i, 1);
+
+                // If Token Is Incomplete, Continue
+                if (i < sentence.Length - 1 && !IsFullToken(token, sentence.Substring(i + 1, 1)))
+                    continue;
+                // Else Check If Last Character In Sentence Is Valid
+                else if (i == sentence.Length - 1) IsFullToken(token);
+
+                // Add Complete Token To Array
+                tokens.Add(token);
+                token = "";
+            }
+
+            return tokens.ToArray();
+        }
+
+        // Check If Token Is Complete
+        static private bool IsFullToken(string token, string next = "#")
+        {
+            // Token Is A Symbol
+            if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
+                return (next == "#" || !Regex.IsMatch(next, "^[z-zA-Z0-9]$"));
+            // Token Is A Valid Operator
+            else if (Regex.IsMatch(token, "^[|]{2}$|^<=>$|^=>$|^&$|^~$|^[(]{1}$|^[)]{1}$"))
+                return true;
+            // Invalid Token (Throw Format Exception)
+            else if (token != "|" && token != "<" && token != "<=" && token != "=")
+                throw new FormatException("Unknown Token '" + token[^1..] + "' Found In Data File.");
+            // Default False Return
+            return false;
         }
     }
 }
