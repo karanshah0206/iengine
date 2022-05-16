@@ -9,6 +9,7 @@ namespace iengine
         private Dictionary<string, int> _operatorPrecedence;
         private Dictionary<string, bool> _symbols;
         private List<string> _sentences;
+        private List<Queue<string>> _postfixSentences;
 
         // Constructor
         public KB()
@@ -16,6 +17,7 @@ namespace iengine
             _operatorPrecedence = new();
             _symbols = new();
             _sentences = new();
+            _postfixSentences = new();
 
             // Setting Up Logicl Operator Precedences
             _operatorPrecedence.Add("~", 4);
@@ -23,6 +25,24 @@ namespace iengine
             _operatorPrecedence.Add("||", 2);
             _operatorPrecedence.Add("=>", 1);
             _operatorPrecedence.Add("<=>", 0);
+        }
+
+        // Read-Only Property Symbols
+        public Dictionary<string, bool> Symbols
+        {
+            get { return _symbols; }
+        }
+
+        // Read-Only Property Sentences (Infix)
+        public List<string> Sentences
+        {
+            get { return _sentences; }
+        }
+
+        // Read-Only Property Postfix Sentences
+        public List<Queue<string>> PostfixSentences
+        {
+            get { return _postfixSentences; }
         }
 
         // Add Sentence To KB (Sentence Cannot Contain Spaces)
@@ -38,6 +58,7 @@ namespace iengine
                 else // Else Add New Sentence
                 {
                     _sentences.Add(sentence);
+                    _postfixSentences.Add(ShuntingYard(SentenceToArray(sentence)));
 
                     // Look For Unknown Symbols In Sentence
                     foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
