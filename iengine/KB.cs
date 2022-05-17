@@ -61,16 +61,28 @@ namespace iengine
                     _postfixSentences.Add(ShuntingYard(SentenceToArray(sentence)));
 
                     // Look For Unknown Symbols In Sentence
-                    foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
-                        if (symbol.Trim().Length <= 0) continue;
-                        else if (!_symbols.ContainsKey(symbol.Trim()))
-                            _symbols[symbol.Trim()] = false;
+                    foreach (string symbol in GetSymbolsFromSentence(SentenceToArray(sentence)))
+                        if (!_symbols.ContainsKey(symbol))
+                            _symbols[symbol] = false;
                 }
             }
         }
 
+        // Get All Propositional Symbols From A Sentence String
+        public static List<string> GetSymbolsFromSentence(string[] sentence)
+        {
+            List<string> symbols = new();
+            foreach (string token in sentence)
+                if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
+                    symbols.Add(token);
+            //foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
+            //    if (symbol.Trim().Length <= 0) continue;
+            //    else symbols.Add(symbol.Trim());
+            return symbols;
+        }
+
         // Convert Infix Sentences To Postfix Using Shunting Yard Algorithm
-        private Queue<string> ShuntingYard(string[] infixSentence)
+        public Queue<string> ShuntingYard(string[] infixSentence)
         {
             Queue<string> queue = new();
             Stack<string> stack = new();
@@ -144,7 +156,7 @@ namespace iengine
         }
 
         // Split Elements In Sentence To An Array
-        static private string[] SentenceToArray(string sentence)
+        public static string[] SentenceToArray(string sentence)
         {
             List<string> tokens = new();
             string token = "";
@@ -170,17 +182,17 @@ namespace iengine
         }
 
         // Check If Token Is Complete
-        static private bool IsFullToken(string token, string next = "#")
+        private static bool IsFullToken(string token, string next = "#")
         {
             // Token Is A Symbol
             if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
-                return (next == "#" || !Regex.IsMatch(next, "^[z-zA-Z0-9]$"));
+                return (next == "#" || !Regex.IsMatch(next, "^[a-zA-Z0-9]$"));
             // Token Is A Valid Operator
             else if (Regex.IsMatch(token, "^[|]{2}$|^<=>$|^=>$|^&$|^~$|^[(]{1}$|^[)]{1}$"))
                 return true;
             // Invalid Token (Throw Format Exception)
             else if (token != "|" && token != "<" && token != "<=" && token != "=")
-                throw new FormatException("Unknown Token '" + token[^1..] + "' Found In Data File.");
+                throw new FormatException("Unknown Token '" + token + "' Found In Data File.");
             // Default False Return
             return false;
         }
