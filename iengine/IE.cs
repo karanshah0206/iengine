@@ -22,16 +22,24 @@ namespace iengine
         public abstract void Infer(KB kB, string query);
 
         // Check If Model Satisfies Knowledge Base
-        protected bool PLTrue(KB kB, Dictionary<string, bool> model)
+        protected static bool PLTrue(KB kB, Dictionary<string, bool> model)
         {
-            foreach (Queue<string> sentence in kB.PostfixSentences)
-                if (!PostfixEvaluator(sentence, model))
+            // Check Model Satisfies All True Symbols In KB
+            foreach(var symbol in kB.Symbols)
+                if (symbol.Value && model[symbol.Key] == false)
                     return false;
+
+            // Check Model Satisfies All Sentences In KB
+            List<Queue<string>> sentences = new(kB.PostfixSentences);
+            foreach (Queue<string> sentence in sentences)
+                if (!PostfixEvaluator(new(sentence), model))
+                    return false;
+
             return true;
         }
 
         // Evaluate Propositional Postfix Sentence Using Model
-        protected bool PostfixEvaluator(Queue<string> sentence, Dictionary<string, bool> model)
+        protected static bool PostfixEvaluator(Queue<string> sentence, Dictionary<string, bool> model)
         {
             Stack<bool> stack = new Stack<bool>();
             bool LHS, RHS;
@@ -58,6 +66,8 @@ namespace iengine
                         case "<=>": // Biconditional
                             RHS = stack.Pop(); LHS = stack.Pop();
                             stack.Push(LHS == RHS); break;
+                        default: // Invalid Token
+                            throw new FormatException("Postfix Sentence Is Invalid.");
                     }
 
             return stack.Pop();
