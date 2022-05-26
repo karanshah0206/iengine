@@ -81,6 +81,7 @@ namespace iengine
                 case "TT": return new TT();
                 case "FC": return new FC();
                 case "BC": return new BC();
+                case "WSAT": return new WSAT();
                 default: throw new ArgumentException("Invalid Method '" + mode + "'");
             }
         }
