@@ -13,23 +13,19 @@ namespace iengine
             // Get All Known Symbols From KB
             Dictionary<string, bool> symbols = new(kB.Symbols);
 
+            _output = "NO"; // Initialise Output
+
             // If Query Symbol Unknown To KB, BC Cannot Infer Query
-            if (!symbols.ContainsKey(query))
-            {
-                _output = "NO";
-                return;
-            }
+            if (!symbols.ContainsKey(query)) return;
 
             // Recursive Backward-Chaining
             List<string> explored = new();
             if (BCRecursive(kB, symbols, query, explored))
             {
                 _output = "YES: ";
-                foreach (string s in explored)
-                    _output += s + " ";
+                foreach (string s in explored) _output += s + " ";
                 _output += query;
             }
-            else _output = "NO";
         }
 
         private bool BCRecursive(KB kB, Dictionary<string, bool> symbols, string query, List<string> explored)
@@ -37,7 +33,7 @@ namespace iengine
             // If Query Is A Known Fact
             if (symbols[query] == true) return true;
 
-            // Get Clause That Concludes Query
+            // Get Clauses That Concludes Query
             foreach (Queue<string> c in kB.PostfixSentences)
             {
                 string[] clause = c.ToArray();
@@ -54,15 +50,25 @@ namespace iengine
                     int trueSymbolCount = 0;
                     foreach (string p in premiseSymbols)
                     {
+                        if (p == query) break; // Avoiding Infinite Recursion
+                        if (explored.Contains(p)) // If Already Symbol Explored
+                        {
+                            if (!symbols[p]) break; // Explored Symbol Evaluated False
+                        }
+                        else explored.Add(p); // Add Symbol To Explored
+
                         symbols[p] = BCRecursive(kB, new(symbols), p, explored);
                         if (!symbols[p]) break;
-                        if (!explored.Contains(p)) { explored.Add(p); }
                         trueSymbolCount++;
                     }
-                    if (trueSymbolCount == premiseSymbols.Count) return true;
+
+                    // Check If All Symbols In Premise Are True
+                    if (trueSymbolCount == premiseSymbols.Count)
+                        return true;
                 }
             }
-            return false;
+
+            return false; // KB Does Entail Query
         }
     }
 }
