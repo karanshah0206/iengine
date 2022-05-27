@@ -66,7 +66,7 @@ namespace iengine
                         }
                         else explored.Add(p); // Add Symbol To Explored
 
-                        symbols[p] = BCRecursive(kB, new(symbols), p, explored);
+                        symbols[p] = BCRecursive(kB, new(symbols), p, new(explored));
                         if (!symbols[p]) break;
                         trueSymbolCount++;
                     }
