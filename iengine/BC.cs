@@ -5,8 +5,10 @@ namespace iengine
 {
     class BC : IE
     {
+        List<string> _outputList;
+
         public BC() : base()
-        { _output = ""; }
+        { _output = ""; _outputList = new(); }
 
         public override void Infer(KB kB, string query)
         {
@@ -23,7 +25,9 @@ namespace iengine
             if (BCRecursive(kB, symbols, query, explored))
             {
                 _output = "YES: ";
-                for (int i = explored.Count - 1; i >= 0; i--) _output += explored[i] + ", ";
+                foreach (string s in _outputList)
+                    if (s != query)
+                        _output += s + ", ";
                 _output += query;
             }
         }
@@ -31,7 +35,12 @@ namespace iengine
         private bool BCRecursive(KB kB, Dictionary<string, bool> symbols, string query, List<string> explored)
         {
             // If Query Is A Known Fact
-            if (symbols[query] == true) return true;
+            if (symbols[query] == true)
+            {
+                if (!_outputList.Contains(query))
+                    _outputList.Add(query);
+                return true;
+            }
 
             // Get Clauses That Concludes Query
             foreach (Queue<string> c in kB.PostfixSentences)
@@ -64,7 +73,11 @@ namespace iengine
 
                     // Check If All Symbols In Premise Are True
                     if (trueSymbolCount == premiseSymbols.Count)
+                    {
+                        if (!_outputList.Contains(query))
+                            _outputList.Add(query);
                         return true;
+                    }
                 }
             }
 
