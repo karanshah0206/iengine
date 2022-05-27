@@ -45,7 +45,7 @@ namespace iengine
                 if (!inferred[p])
                 {
                     inferred[p] = true; // Symbol p Inferred
-                    _output += p + " ";
+                    _output += p + ", ";
 
                     foreach(Queue<string> clause in kB.PostfixSentences)
                     {

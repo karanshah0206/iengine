@@ -23,7 +23,7 @@ namespace iengine
             if (BCRecursive(kB, symbols, query, explored))
             {
                 _output = "YES: ";
-                foreach (string s in explored) _output += s + " ";
+                for (int i = explored.Count - 1; i >= 0; i--) _output += explored[i] + ", ";
                 _output += query;
             }
         }
