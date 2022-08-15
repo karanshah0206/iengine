@@ -34,17 +34,16 @@ namespace iengine
                 {
                     if (PostfixEvaluator(query, model)) // Model Satisfies Query
                         _output = (int.Parse(_output) + 1).ToString();
-                    else // Query Not True For All Models of KB
-                    { _output = "NO"; return; }
+                    else { _output = "NO"; return; }
                 }
             }
             else
             {
                 // Generate Models Using Recursion
-                Dictionary<string, bool> m1 = new(model);
+                Dictionary<string, bool> mod = new(model);
                 string symbol = symbols.Dequeue();
-                m1[symbol] = true; TTCheckAll(kB, new(query), new(symbols), m1);
-                m1[symbol] = false; TTCheckAll(kB, new(query), new(symbols), m1);
+                mod[symbol] = true; TTCheckAll(kB, new(query), new(symbols), mod);
+                mod[symbol] = false; TTCheckAll(kB, new(query), new(symbols), mod);
             }
         }
     }
