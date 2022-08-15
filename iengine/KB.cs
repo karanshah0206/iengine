@@ -75,9 +75,6 @@ namespace iengine
             foreach (string token in sentence)
                 if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
                     symbols.Add(token);
-            //foreach (string symbol in Regex.Split(sentence, "[()&|<=>~]+"))
-            //    if (symbol.Trim().Length <= 0) continue;
-            //    else symbols.Add(symbol.Trim());
             return symbols;
         }
 
@@ -135,13 +132,13 @@ namespace iengine
                             break;
                         }
 
-                        // If Stack Item Takes Precedence
-                        // Or Equal Precedence And Token Is Left-Associative, Enqueue Stack Item
+                        // If Stack Item Takes Precedence Or
+                        // Equal Precedence And Token Is Left-Associative
+                        // Enqueue Stack Item
                         if (_operatorPrecedence[stackItem] > _operatorPrecedence[token]
                             || (_operatorPrecedence[stackItem] == _operatorPrecedence[token] && token != "~"))
                             queue.Enqueue(stack.Pop());
-                        // If Token Takes Precedence Or Is Right-Associative, Push Into Stack
-                        else
+                        else // Else Token Takes Precedence Or Is Right-Associative (Push Into Stack)
                         {
                             stack.Push(token);
                             break;
@@ -181,18 +178,21 @@ namespace iengine
             return tokens.ToArray();
         }
 
-        // Check If Token Is Complete
+        // Check If Token Is Valid And Complete
         private static bool IsFullToken(string token, string next = "#")
         {
             // Token Is A Symbol
             if (Regex.IsMatch(token, "^[a-zA-Z0-9]+$"))
                 return (next == "#" || !Regex.IsMatch(next, "^[a-zA-Z0-9]$"));
+
             // Token Is A Valid Operator
             else if (Regex.IsMatch(token, "^[|]{2}$|^<=>$|^=>$|^&$|^~$|^[(]{1}$|^[)]{1}$"))
                 return true;
+
             // Invalid Token (Throw Format Exception)
             else if (token != "|" && token != "<" && token != "<=" && token != "=")
                 throw new FormatException("Unknown Token '" + token + "' Found In Data File.");
+
             // Default False Return
             return false;
         }
