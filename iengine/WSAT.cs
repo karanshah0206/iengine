@@ -23,7 +23,7 @@ namespace iengine
             // Get Relevance Of Symbols To Clauses In KB
             Dictionary<string, int> symbolPriority = FindMostRelevantSymbol(new(kB.PostfixSentences));
 
-            float randomFlipChance = 0.5f; // Change Of A Symbol Being Flipped Randomly
+            float randomFlipChance = 0.5f; // Chance Of A Symbol Being Flipped Randomly
             ShuffleModel(model); // Random Assignment Of True/False To Symbols In Model
 
             for (int i = 1; i <= maxIterations; i++)
@@ -51,11 +51,12 @@ namespace iengine
                     // Flip Symbol That Maximises Number Of Satisfied Clauses
                     else FlipSymbolByRelevance(new(clause), symbolPriority, model);
                 }
+                // If No Clause Evaluates To False, Shuffle Model Randomly
                 else ShuffleModel(model);
             }
         }
 
-        // Assign Random Values To Symbols Within A Given  Model
+        // Assigns Random Values To Symbols Within A Given Model
         private void ShuffleModel(Dictionary<string, bool> model)
         {
             Random random = new();
@@ -80,7 +81,7 @@ namespace iengine
             return relevance;
         }
 
-        // Select A Random Clause From A List That Evaluates To False
+        // Selects A Random Clause From A List That Evaluates To False
         private Queue<string> GetRandomFalseClause(List<Queue<string>> clauses, Dictionary<string, bool> model)
         {
             // Check If Any False Clause Exists
@@ -105,7 +106,7 @@ namespace iengine
             }
         }
 
-        // Select A Random Symbol From A Clause & Flip Its Value
+        // Selects A Random Symbol From A Clause & Flip Its Value
         private void FlipRandomSymbol(Queue<string> clause, Dictionary<string, bool> model)
         {
             Random random = new();
@@ -125,7 +126,7 @@ namespace iengine
             }
         }
 
-        // Flip Symbol From A Clause Which Has The Highest Relevance To Clauses In KB
+        // Flips Symbol From A Clause Which Has The Highest Relevance To Clauses In KB
         private void FlipSymbolByRelevance(Queue<string> clause, Dictionary<string, int> relevance, Dictionary<string, bool> model)
         {
             string[] clauseArray = clause.ToArray();
